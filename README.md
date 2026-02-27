@@ -293,5 +293,4 @@ Pull requests are welcome! If you find a bug or want to add a
 new feature like Telegram notifications or a dashboard, feel free
 to open an issue.
 
-- LinkedIn: [your linkedin url]
-- GitHub: [your github url]
+- LinkedIn: [https://www.linkedin.com/in/shashankkanade/]
