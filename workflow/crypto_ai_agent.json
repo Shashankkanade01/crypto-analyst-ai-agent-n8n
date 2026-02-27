@@ -1,0 +1,246 @@
+{
+  "name": "Crypto AI Intelligence Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        32
+      ],
+      "id": "c3ee8754-c5fb-4207-b14d-35e2e9a14e0a",
+      "name": "When chat message received",
+      "webhookId": "eb7654cf-88e0-4d71-8588-bc11f751ed79"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a helpful assistant that extracts cryptocurrency information.\nYou MUST reply in EXACTLY this format every single time, no exceptions:\n\nCOINGECKO_ID: bitcoin\nTICKER: BTC\n\nRules:\n- Always use a real newline between the two lines\n- Never use | or any other separator\n- Always lowercase for COINGECKO_ID\n- Always uppercase for TICKER\n- No extra text, no explanation, nothing else\n\nExamples:\n\"Bitcoin\" →\nCOINGECKO_ID: bitcoin\nTICKER: BTC\n\n\"Ethereum\" →\nCOINGECKO_ID: ethereum\nTICKER: ETH\n\n\"Dogecoin\" →\nCOINGECKO_ID: dogecoin\nTICKER: DOGE\n\n\"Solana\" →\nCOINGECKO_ID: solana\nTICKER: SOL\n\nThe user said: {{ $json.chatInput }}\n\nReply with ONLY the two lines above. Nothing else.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        32
+      ],
+      "id": "8b8bc1ff-bc19-482c-9c06-b6c9d84b173a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        208,
+        256
+      ],
+      "id": "797475b8-d3f3-44fe-8201-8d945151500a",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "e99Bn4MxYePnhInA",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.coingecko.com/api/v3/simple/price?ids={{ $('AI Agent').item.json.output.split('\\n')[0].replace('COINGECKO_ID: ', '').trim().toLowerCase() }}&vs_currencies=usd&include_24hr_change=true&include_market_cap=true",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-cg-demo-api-key",
+              "value": "CG-9XFiEvybxTwgoGPrVyE4Ku9F"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        560,
+        32
+      ],
+      "id": "094913fb-48c6-4b98-a2fe-c0251d76af6b",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "url": "=https://min-api.cryptocompare.com/data/v2/news/?lang=EN&categories={{ $('AI Agent').item.json.output.split('\\n')[1].replace('TICKER: ', '').trim() }}&sortOrder=latest&limit=3&api_key=256280935c555127653d0152891fe1103d02e6a54c15ccb2459654aecb9f5b3b",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        768,
+        32
+      ],
+      "id": "e16404cc-701c-47b1-b439-946a247164aa",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a professional crypto analyst. Generate a short but insightful analytics report based on the following data.\n\nCryptocurrency: {{ $('AI Agent').item.json.output.split('\\n')[0].replace('COINGECKO_ID: ', '').trim() }}\n\nLive Price Data:\n- Current Price: ${{ $('HTTP Request').item.json[$('AI Agent').item.json.output.split('\\n')[0].replace('COINGECKO_ID: ', '').trim().toLowerCase()].usd }}\n- 24h Change: {{ $('HTTP Request').item.json[$('AI Agent').item.json.output.split('\\n')[0].replace('COINGECKO_ID: ', '').trim().toLowerCase()].usd_24h_change }}%\n- Market Cap: ${{ $('HTTP Request').item.json[$('AI Agent').item.json.output.split('\\n')[0].replace('COINGECKO_ID: ', '').trim().toLowerCase()].usd_market_cap }}\n\nTop 3 Latest News:\n\n1. Title: {{ $('HTTP Request1').item.json.Data[0].title }}\n   Description: {{ $('HTTP Request1').item.json.Data[0].body }}\n\n2. Title: {{ $('HTTP Request1').item.json.Data[1].title }}\n   Description: {{ $('HTTP Request1').item.json.Data[1].body }}\n\n3. Title: {{ $('HTTP Request1').item.json.Data[2].title }}\n   Description: {{ $('HTTP Request1').item.json.Data[2].body }}\n\nYour report should cover:\n1. Current price summary\n2. What the 24h change indicates (bullish/bearish)\n3. How the news might be affecting sentiment\n4. A brief short-term outlook\n\nKeep it clear, professional, and under 200 words.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        976,
+        32
+      ],
+      "id": "35398e96-5cad-4cc5-8f11-a0fe37cec885",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        976,
+        240
+      ],
+      "id": "b4276aec-e98b-408d-bac7-301337a1c3b6",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "e99Bn4MxYePnhInA",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "shashankkanade01@gmail.com",
+        "subject": "=Crypto Report: {{ $('AI Agent').item.json.output }} - {{ $now.format('dd MMM yyyy') }}",
+        "message": "=<div style=\"font-family: Arial, sans-serif; max-width: 650px; margin: 0 auto; background-color: #f4f4f4; padding: 20px;\">\n\n  <!-- Header -->\n  <div style=\"background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 12px; padding: 30px; text-align: center; margin-bottom: 20px;\">\n    <h1 style=\"color: #f0b90b; margin: 0; font-size: 28px;\">🤖 Crypto AI Agent</h1>\n    <p style=\"color: #a0a0b0; margin: 8px 0 0 0; font-size: 14px;\">Automated Analytics Report • {{ $now.format('dd MMM yyyy HH:mm') }}</p>\n  </div>\n\n  <!-- Coin Title -->\n  <div style=\"background: #ffffff; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 20px; border-left: 5px solid #f0b90b;\">\n    <h2 style=\"margin: 0; color: #1a1a2e; font-size: 24px;\">\n      {{ $('AI Agent').item.json.output.split('\\n')[0].replace('COINGECKO_ID: ', '').trim().toUpperCase() }} Analysis\n    </h2>\n    <p style=\"color: #666; margin: 5px 0 0 0; font-size: 13px;\">Live data fetched in real time</p>\n  </div>\n\n  <!-- Price Cards -->\n  <div style=\"display: flex; gap: 15px; margin-bottom: 20px;\">\n\n    <div style=\"background: #ffffff; border-radius: 12px; padding: 20px; flex: 1; text-align: center; border-top: 4px solid #f0b90b;\">\n      <p style=\"margin: 0; color: #888; font-size: 12px; text-transform: uppercase;\">Current Price</p>\n      <p style=\"margin: 8px 0 0 0; color: #1a1a2e; font-size: 22px; font-weight: bold;\">\n        ${{ $('HTTP Request').item.json[$('AI Agent').item.json.output.split('\\n')[0].replace('COINGECKO_ID: ', '').trim().toLowerCase()].usd.toLocaleString() }}\n      </p>\n    </div>\n\n    <div style=\"background: #ffffff; border-radius: 12px; padding: 20px; flex: 1; text-align: center; border-top: 4px solid {{ $('HTTP Request').item.json[$('AI Agent').item.json.output.split('\\n')[0].replace('COINGECKO_ID: ', '').trim().toLowerCase()].usd_24h_change > 0 ? '#00c853' : '#d50000' }};\">\n      <p style=\"margin: 0; color: #888; font-size: 12px; text-transform: uppercase;\">24h Change</p>\n      <p style=\"margin: 8px 0 0 0; font-size: 22px; font-weight: bold; color: {{ $('HTTP Request').item.json[$('AI Agent').item.json.output.split('\\n')[0].replace('COINGECKO_ID: ', '').trim().toLowerCase()].usd_24h_change > 0 ? '#00c853' : '#d50000' }};\">\n        {{ $('HTTP Request').item.json[$('AI Agent').item.json.output.split('\\n')[0].replace('COINGECKO_ID: ', '').trim().toLowerCase()].usd_24h_change.toFixed(2) }}%\n      </p>\n    </div>\n\n    <div style=\"background: #ffffff; border-radius: 12px; padding: 20px; flex: 1; text-align: center; border-top: 4px solid #1565c0;\">\n      <p style=\"margin: 0; color: #888; font-size: 12px; text-transform: uppercase;\">Market Cap</p>\n      <p style=\"margin: 8px 0 0 0; color: #1a1a2e; font-size: 18px; font-weight: bold;\">\n        ${{ ($('HTTP Request').item.json[$('AI Agent').item.json.output.split('\\n')[0].replace('COINGECKO_ID: ', '').trim().toLowerCase()].usd_market_cap / 1e9).toFixed(2) }}B\n      </p>\n    </div>\n\n  </div>\n\n  <!-- Top 3 News -->\n  <div style=\"background: #ffffff; border-radius: 12px; padding: 25px; margin-bottom: 20px;\">\n    <h3 style=\"margin: 0 0 20px 0; color: #1a1a2e; font-size: 18px; border-bottom: 2px solid #f0b90b; padding-bottom: 10px;\">📰 Top 3 Latest News</h3>\n\n    <div style=\"margin-bottom: 15px; padding: 15px; background: #f9f9f9; border-radius: 8px; border-left: 4px solid #f0b90b;\">\n      <p style=\"margin: 0; font-weight: bold; color: #1a1a2e; font-size: 14px;\">{{ $('HTTP Request1').item.json.Data[0].title }}</p>\n      <p style=\"margin: 8px 0 0 0; color: #555; font-size: 13px; line-height: 1.5;\">{{ $('HTTP Request1').item.json.Data[0].body.substring(0, 150) }}...</p>\n    </div>\n\n    <div style=\"margin-bottom: 15px; padding: 15px; background: #f9f9f9; border-radius: 8px; border-left: 4px solid #1565c0;\">\n      <p style=\"margin: 0; font-weight: bold; color: #1a1a2e; font-size: 14px;\">{{ $('HTTP Request1').item.json.Data[1].title }}</p>\n      <p style=\"margin: 8px 0 0 0; color: #555; font-size: 13px; line-height: 1.5;\">{{ $('HTTP Request1').item.json.Data[1].body.substring(0, 150) }}...</p>\n    </div>\n\n    <div style=\"padding: 15px; background: #f9f9f9; border-radius: 8px; border-left: 4px solid #00897b;\">\n      <p style=\"margin: 0; font-weight: bold; color: #1a1a2e; font-size: 14px;\">{{ $('HTTP Request1').item.json.Data[2].title }}</p>\n      <p style=\"margin: 8px 0 0 0; color: #555; font-size: 13px; line-height: 1.5;\">{{ $('HTTP Request1').item.json.Data[2].body.substring(0, 150) }}...</p>\n    </div>\n  </div>\n\n  <!-- AI Report -->\n  <div style=\"background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 12px; padding: 25px; margin-bottom: 20px;\">\n    <h3 style=\"margin: 0 0 15px 0; color: #f0b90b; font-size: 18px;\">🤖 AI Analytics Report</h3>\n    <p style=\"margin: 0; color: #d0d0e0; font-size: 14px; line-height: 1.8;\">\n      {{ $('AI Agent1').item.json.output }}\n    </p>\n  </div>\n\n  <!-- Footer -->\n  <div style=\"text-align: center; padding: 15px;\">\n    <p style=\"margin: 0; color: #999; font-size: 12px;\">Generated by Crypto AI Agent • {{ $now.format('dd MMM yyyy HH:mm') }}</p>\n    <p style=\"margin: 5px 0 0 0; color: #bbb; font-size: 11px;\">This is not financial advice. Always do your own research.</p>\n  </div>\n\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1328,
+        32
+      ],
+      "id": "ebb38e3b-f5db-4a15-8724-5be31d1704ff",
+      "name": "Send a message",
+      "webhookId": "0e98933e-623e-48c3-b41e-edd725510ad9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "EFYzuvcEke8r8vL4",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "timezone": "Asia/Kolkata",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1
+  },
+  "versionId": "8e834610-0316-4758-97ab-b9922cdb5451",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ea2f4713d322a596eb561e4c20c3e29a723cdf51e6559f9a33075bd42839a1c8"
+  },
+  "id": "THOV5EGTXBekrhBt",
+  "tags": []
+}
