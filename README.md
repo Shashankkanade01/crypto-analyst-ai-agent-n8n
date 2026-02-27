@@ -17,7 +17,7 @@ AI analytics report, and sends it to your email - all with zero code.
 > User types "Bitcoin" → Gets a full AI analytics report in their inbox in seconds.
 
 ![Workflow Overview](screenshots/workflow_overview.png)
-![Email Report](screenshots/email_report.png)
+![Email Report](screenshots/email_bitcoin.png)
 
 ---
 
