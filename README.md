@@ -9,7 +9,6 @@ AI analytics report, and sends it to your email - all with zero code.
 ![CoinGecko](https://img.shields.io/badge/Prices-CoinGecko-green)
 ![CryptoCompare](https://img.shields.io/badge/News-CryptoCompare-purple)
 ![Gmail](https://img.shields.io/badge/Email-Gmail-red)
-![License](https://img.shields.io/badge/License-MIT-yellow)
 
 ---
 
