@@ -131,6 +131,8 @@ The user said: {{ $json.chatInput }}
 Reply with ONLY the two lines above. Nothing else.
 ```
 
+- You can add as many currencies as you want.
+
 - **Output example:**
 ```
 COINGECKO_ID: bitcoin
