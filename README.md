@@ -1,8 +1,8 @@
-# 🤖 Crypto AI Intelligence Agent — Built with n8n
+# 🤖 Crypto AI Intelligence Agent - Built with n8n
 
 An automated AI-powered crypto analytics agent that chats with users,
 fetches live prices, reads the latest news, generates a professional
-AI analytics report, and sends it to your email — all with zero code.
+AI analytics report, and sends it to your email - all with zero code.
 
 ![n8n](https://img.shields.io/badge/Built%20with-n8n-orange)
 ![Groq](https://img.shields.io/badge/AI-Groq%20LLaMA%203.3-blue)
@@ -42,24 +42,24 @@ AI analytics report, and sends it to your email — all with zero code.
 │   [Chat Trigger]                                            │
 │        │                                                    │
 │        ▼                                                    │
-│   [AI Agent — Groq LLaMA 3.3]                              │
+│   [AI Agent — Groq LLaMA 3.1]                               │
 │   Extracts coin ID and ticker symbol from user message      │
 │        │                                                    │
 │        ▼                                                    │
-│   [HTTP Request — CoinGecko API]                           │
-│   Fetches live price, market cap, 24h change               │
+│   [HTTP Request — CoinGecko API]                            │
+│   Fetches live price, market cap, 24h change                │
 │        │                                                    │
 │        ▼                                                    │
-│   [HTTP Request — CryptoCompare API]                       │
-│   Fetches top 3 latest news articles for the coin          │
+│   [HTTP Request — CryptoCompare API]                        │
+│   Fetches top 3 latest news articles for the coin           │
 │        │                                                    │
 │        ▼                                                    │
-│   [AI Agent1 — Groq LLaMA 3.3]                             │
+│   [AI Agent1 — Groq LLaMA 3.3]                              │
 │   Generates professional analytics report                   │
 │        │                                                    │
 │        ▼                                                    │
 │   [Gmail — Send Email]                                      │
-│   Sends beautifully formatted HTML report to inbox         │
+│   Sends beautifully formatted HTML report to inbox          │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -71,7 +71,7 @@ AI analytics report, and sends it to your email — all with zero code.
 | Tool | Purpose | Cost |
 |------|---------|------|
 | [n8n](https://n8n.io) | Workflow automation | Free |
-| [Groq API](https://console.groq.com) | AI model — LLaMA 3.3 70B | Free |
+| [Groq API](https://console.groq.com) | AI model — LLaMA-3.1-8b-instant & LLaMA.3.3-70b-versatile | Free |
 | [CoinGecko API](https://coingecko.com) | Live crypto prices | Free |
 | [CryptoCompare API](https://cryptocompare.com) | Crypto news | Free |
 | [Gmail](https://gmail.com) | Email delivery | Free |
@@ -90,7 +90,7 @@ AI analytics report, and sends it to your email — all with zero code.
 
 ### Node 2 — AI Agent (Extract Coin Info)
 - **Type:** n8n AI Agent + Groq Chat Model
-- **Model:** `llama-3.3-70b-versatile`
+- **Model:** `llama-3.1-8b-instant`
 - **What it does:** Extracts the CoinGecko coin ID and ticker symbol
   from the user's message
 - **Prompt:**
@@ -122,7 +122,13 @@ TICKER: ETH
 COINGECKO_ID: dogecoin
 TICKER: DOGE
 
+"Solana" →
+COINGECKO_ID: solana
+TICKER: SOL
+
 The user said: {{ $json.chatInput }}
+
+Reply with ONLY the two lines above. Nothing else.
 ```
 
 - **Output example:**
@@ -234,66 +240,6 @@ Keep it clear, professional, and under 200 words.
 
 ---
 
-## 🐛 Common Issues & Fixes
-
-### ❌ Groq Quota Exceeded
-```
-Error: You exceeded your current quota
-```
-**Fix:** You are using a paid model like `gemini-2.5-pro`.
-Switch to `llama-3.3-70b-versatile` in Groq which is completely free.
-
----
-
-### ❌ CoinGecko Returns Empty
-```
-Output: This is an item but it is empty
-```
-**Fix:** The coin ID expression is wrong. Make sure your URL uses:
-```
-.split('\n')[0].replace('COINGECKO_ID: ', '').trim().toLowerCase()
-```
-The coin ID must be lowercase for CoinGecko to recognize it.
-
----
-
-### ❌ CryptoCompare Returns Undefined
-```
-categories=undefined
-```
-**Fix:** The AI Agent is returning the output with `|` instead of
-a newline. Update your AI Agent prompt to strictly enforce newline
-format and never use `|` separator.
-
----
-
-### ❌ CryptoPanic Returns 404
-```
-The resource you are requesting could not be found
-```
-**Fix:** CryptoPanic changed their free API endpoint.
-Use CryptoCompare instead which is more reliable and free.
-
----
-
-### ❌ Gemini Free Tier Not Working
-```
-Quota exceeded, limit: 0, model: gemini-2.5-pro
-```
-**Fix:** Gemini 2.5 Pro has zero free quota. Use Groq instead:
-1. Sign up at console.groq.com
-2. Get free API key
-3. Replace Gemini node with Groq Chat Model node in n8n
-
----
-
-### ❌ Gmail OAuth Error
-**Fix:** When setting up Gmail permissions, only select:
-- ✅ Manage drafts and send emails
-- ✅ Read, compose and send emails from your Gmail account
-
----
-
 ## 🚀 How to Run This Project
 
 ### Step 1 — Get Free API Keys
@@ -329,14 +275,13 @@ crypto-ai-agent-n8n/
 │
 ├── README.md
 ├── workflow/
-│   └── crypto_ai_agent.json    ← Import this into n8n
+│   └── crypto_ai_agent.json   
 ├── screenshots/
-│   ├── workflow_overview.png
-│   ├── email_bitcoin.png
-│   ├── email_ethereum.png
-│   └── email_dogecoin.png
-└── docs/
-    └── setup_guide.md
+    ├── workflow_overview.png
+    ├── email_bitcoin.png
+    ├── email_ethereum.png
+    └── email_dogecoin.png
+
 ```
 
 ---
@@ -346,24 +291,6 @@ crypto-ai-agent-n8n/
 Pull requests are welcome! If you find a bug or want to add a
 new feature like Telegram notifications or a dashboard, feel free
 to open an issue.
-
----
-
-## 📄 License
-
-MIT License — free to use, modify and distribute.
-
----
-
-## 👤 Author
-
-Built with ❤️ using n8n, Groq and free APIs.
-
-If this helped you, please ⭐ star the repo and share it!
-
----
-
-## 🔗 Connect
 
 - LinkedIn: [your linkedin url]
 - GitHub: [your github url]
